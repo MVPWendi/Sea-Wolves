@@ -6,28 +6,33 @@ using UnityEngine;
 
 public class Ship : MonoBehaviour
 {
+    [SerializeField]
     ShipMovement shipMovement;
+    [SerializeField]
     public ShipStats shipStats;
     private CharacterController characterController;
-        
+
+    [SerializeField]
+    private GameObject[] Sails;
     // Start is called before the first frame update
     void Start()
     {
         shipMovement = new ShipMovement();
+        shipMovement.Sails = new Sail(Sails[0], Sails[1]);
         shipStats = new ShipStats
         {
-            MaxSpeed = 10,
-            MaxRotateSpeed = 20,
-            MaxAccelerationSpeed = 0.03f,
+            MaxSpeed = 5,
+            MaxRotateSpeed = 40,
+            MaxAccelerationSpeed = 0.01f,
 
         };
         shipMovement.Initialize(shipStats);
-       characterController = GetComponent<CharacterController>();
+        characterController = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        shipMovement.UpdateMove(gameObject.transform,characterController);
+        shipMovement.UpdateMove(gameObject.transform,characterController, shipMovement.Sails);
     }
 }
