@@ -58,6 +58,7 @@ namespace Assets
 
         public int GetItemCountByName(ShipLoot shipLoot)
         {
+
             int result = 0;
             foreach (var item in items)
             {
