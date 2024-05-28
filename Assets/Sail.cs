@@ -30,5 +30,4 @@ namespace Assets
             }
         }
     }
-}'
-    ';lkj;jkj;lihlih
+}
