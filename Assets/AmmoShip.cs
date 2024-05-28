@@ -7,12 +7,11 @@ using UnityEngine;
 
 namespace Assets
 {
-    public class ShipLoot : MonoBehaviour
+    public class AmmoShip : ShipLoot
     {
-        public float ItemWeight; //вес предмета
-        public string Name;
-
-
+        public float AmmoRange;
+        public float AmmoDamage;
+        public GameObject Projectile;
 
     }
 }
