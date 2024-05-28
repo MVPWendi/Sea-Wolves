@@ -16,17 +16,11 @@ namespace Assets
         public Sail Sails; // паруса
         public float MaxSpeed;
 
-
         public int GetInt()
         {
             return 1;
         }
 
-
-        public void Test()
-        {
-
-        }
 
         public void UpdateMove(Transform transform, CharacterController controller, Sail sail)
         {
