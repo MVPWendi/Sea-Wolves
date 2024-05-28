@@ -4,7 +4,7 @@ namespace Assets
 {
     public class ShipInventory
     {
-        public List<ShipLoot> items;
+        private List<ShipLoot> items;
         public float MaxWeight;
 
         public void Additem(ShipLoot shipLoot)
@@ -17,9 +17,9 @@ namespace Assets
 
 
         }
-        public void DelItem()
+        public void DelItem(ShipLoot shipLoot)
         {
-
+            items.Remove(shipLoot);
 
         }
         public float GetCurrentWeight()
