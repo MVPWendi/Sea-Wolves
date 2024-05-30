@@ -34,11 +34,6 @@ public partial class AIControllerSystem : SystemBase
     {
         PhysicsWorld physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
         NativeList<DistanceHit> distanceHits = new NativeList<DistanceHit>(Allocator.TempJob);
-        foreach (var (characterControl, aController) in SystemAPI.Query<RefRW<FirstPersonCharacterControl>, LocalTransform>())
-        {
-
-            Debug.Log("AI UPDATE");
-        }
             foreach (var (characterControl, aiController, localTransform) in SystemAPI.Query<RefRW<FirstPersonCharacterControl>, AIController, LocalTransform>())
         {
             

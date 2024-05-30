@@ -13,10 +13,9 @@ namespace Assets
             {
                 items.Add(shipLoot);
             }
-
-
-
         }
+
+
         public void DelItem(ShipLoot shipLoot)
         {
             items.Remove(shipLoot);

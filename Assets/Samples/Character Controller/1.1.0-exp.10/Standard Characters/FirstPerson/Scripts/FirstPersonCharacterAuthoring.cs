@@ -52,6 +52,7 @@ public class FirstPersonCharacterAuthoring : MonoBehaviour
                 ViewLocalRotation = quaternion.identity,
             });
             AddComponent(entity, new FirstPersonCharacterControl());
+            AddComponent(entity, new OwningPlayer());
         }
     }
 }

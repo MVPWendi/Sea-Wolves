@@ -42,3 +42,12 @@ public struct FirstPersonCharacterView : IComponentData
 {
     public Entity CharacterEntity;
 }
+[Serializable]
+[GhostComponent()]
+public struct OwningPlayer : IComponentData
+{
+    [GhostField()]
+    public Entity Entity;
+}
+public struct CharacterInitialized : IComponentData
+{ }

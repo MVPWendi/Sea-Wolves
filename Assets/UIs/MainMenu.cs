@@ -1,6 +1,8 @@
+using Assets.UIs;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Entities;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +17,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private GameObject HostMenu;
 
-    private MenuState State = MenuState.MainMenu;
+    private MenuState State = MenuState.HostMenu;
 
     [SerializeField]
     private Button HostButton;
@@ -27,41 +29,36 @@ public class MainMenu : MonoBehaviour
 
 
     [SerializeField]
-    private Button HostConfirm;
+    public Button HostConfirm;
 
     [SerializeField]
-    private Button JoinConfirm;
+    public Button JoinConfirm;
 
     [SerializeField]
-    private TMP_InputField JoinIP;
+    public TMP_InputField JoinIP;
 
     private string JoinIPText;
+
+    private bool IsHidden = false;
     void Start()
     {
-        ChangeState(MenuState.MainMenu);
-        HostButton.onClick.AddListener(() => OnButtonClick(MenuState.HostMenu));
-        MainButton.onClick.AddListener(() => OnButtonClick(MenuState.MainMenu));
+        ChangeState(MenuState.HostMenu);
         JoinButton.onClick.AddListener(() => OnButtonClick(MenuState.JoinMenu));
+        HostButton.onClick.AddListener(() => OnButtonClick(MenuState.HostMenu));
+        World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<GameUISystem>().SetUIReferences(this);
     }
     private void ChangeState(MenuState state)
     {
         State = state;
         switch (State)
         {
-            case MenuState.MainMenu:
-                Menu.SetActive(true);
-                JoinMenu.SetActive(false);
-                HostMenu.SetActive(false);
-                break;
             case MenuState.JoinMenu:
                 JoinMenu.SetActive(true);
                 HostMenu.SetActive(false);
-                Menu.SetActive(false);
                 break;
             case MenuState.HostMenu:
                 HostMenu.SetActive(true);
                 JoinMenu.SetActive(false);
-                Menu.SetActive(false);
                 break;
         }
     }
@@ -80,12 +77,15 @@ public class MainMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {         
+            IsHidden = !IsHidden;
+            Menu.SetActive(IsHidden);
+        }
     }
 }
 public enum MenuState
 {
-    MainMenu = 1,
     JoinMenu = 2,
     HostMenu = 3
 }
