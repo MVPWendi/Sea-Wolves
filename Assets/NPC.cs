@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace Assets
 {
@@ -16,10 +18,19 @@ namespace Assets
         public float MoveSpeed;
         public NavMeshAgent controller;
         public GameObject[] PointsToWalk;
-        public Vector3 WalpPoint()
+
+
+        private bool IsStopped;
+        private DateTime WhenStopped;
+        public Vector3 GetRandomWayPoint()
         {
-            Vector3 result = PointsToWalk[(int)UnityEngine.Random.Range(0, PointsToWalk.Length - 1)].transform.position;
-            return result;
+            Vector3 newWaypoint = gameObject.transform.position;
+            int xOffset, zOffset;
+            xOffset = Random.Range(-20, 20);
+            zOffset = Random.Range(-20, 20);
+            newWaypoint.x += xOffset;
+            newWaypoint.z += zOffset;
+            return newWaypoint;
         }
 
         public void Stop() 
@@ -39,15 +50,46 @@ namespace Assets
 
         public void Walk()
         {
-            Vector3 Point = WalpPoint();
-            controller.SetDestination(Point);
+            Vector3 waypoint = GetRandomWayPoint();
+            
+            controller.SetDestination(waypoint);
+            if(controller.pathStatus==NavMeshPathStatus.PathInvalid)
+            {
+                Walk();
+            }
+        }
 
+        private void ProcessStop()
+        {
+            int shouldStop = Random.Range(0, 2);
+            Debug.Log(shouldStop);
+            if (shouldStop == 1)
+            {
+                IsStopped = true;
+                WhenStopped = DateTime.Now;
+                Stop();
+            }
+            else
+            {
+                Go();
+                Walk();
+            }
         }
         public void Update()
         {
-            if (Vector3.Distance(gameObject.transform.position, controller.destination)<= 1)
+            if (Vector3.Distance(gameObject.transform.position, controller.destination)<= 0.5f)
             {
-                Walk();
+                if (!IsStopped)
+                {
+                    ProcessStop();
+                }
+                if (IsStopped && (DateTime.Now-WhenStopped).TotalSeconds>=2f)
+                {
+                    IsStopped = false;
+                    Go();
+                    Walk();
+                }
+                
             }
             if (Input.GetKeyDown(KeyCode.Q))
             {
