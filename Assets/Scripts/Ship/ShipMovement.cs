@@ -51,7 +51,7 @@ namespace Assets
 
             }
             move = transform.forward * Speed;
-            controller.Move(move);
+            transform.Translate(move);
 
         }
         public void Initialize(ShipStats stats) 

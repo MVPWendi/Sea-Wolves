@@ -1,118 +1,67 @@
-﻿using System;
+﻿using Assets.Network;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.NetCode;
+using Unity.Transforms;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
-
+using Unity.Physics;
+using Unity.Physics.Hybrid;
+using Unity.Physics.Authoring;
+using Unity.AI.Navigation;
 namespace Assets
 {
     public class NPC : MonoBehaviour
     {
-        public float MaxHp;
-        public float CurrentHp;
-        public float ShiftSpeed;
-        public float MoveSpeed;
         public NavMeshAgent controller;
-        public GameObject[] PointsToWalk;
 
 
-        private bool IsStopped;
-        private DateTime WhenStopped;
-        public Vector3 GetRandomWayPoint()
-        {
-            Vector3 newWaypoint = gameObject.transform.position;
-            int xOffset, zOffset;
-            xOffset = Random.Range(-20, 20);
-            zOffset = Random.Range(-20, 20);
-            newWaypoint.x += xOffset;
-            newWaypoint.z += zOffset;
-            return newWaypoint;
-        }
-
-        public void Stop() 
-        {
-            controller.speed = 0;
-        }
-
-        public void Run()
-        {
-            controller.speed = ShiftSpeed;
-        }
-        
-        public void Go()
-        {
-            controller.speed = MoveSpeed;
-        }
-
-        public void Walk()
-        {
-            Vector3 waypoint = GetRandomWayPoint();
-            
-            controller.SetDestination(waypoint);
-            if(controller.pathStatus==NavMeshPathStatus.PathInvalid)
-            {
-                Walk();
-            }
-        }
-
-        private void ProcessStop()
-        {
-            int shouldStop = Random.Range(0, 2);
-            Debug.Log(shouldStop);
-            if (shouldStop == 1)
-            {
-                IsStopped = true;
-                WhenStopped = DateTime.Now;
-                Stop();
-            }
-            else
-            {
-                Go();
-                Walk();
-            }
-        }
         public void Update()
         {
-            if (Vector3.Distance(gameObject.transform.position, controller.destination)<= 0.5f)
-            {
-                if (!IsStopped)
-                {
-                    ProcessStop();
-                }
-                if (IsStopped && (DateTime.Now-WhenStopped).TotalSeconds>=2f)
-                {
-                    IsStopped = false;
-                    Go();
-                    Walk();
-                }
-                
-            }
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                Run();
-            }
-
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                Go();
-            }
-            if(Input.GetKeyDown(KeyCode.S)) 
-            { 
-                Stop(); 
-            }
-            
+            controller.SetDestination(new Vector3(100, 0, 100));
         }
+    }
+    public struct NavMeshAgentComponent : IComponentData
+    {
 
+    }
 
-        public void Start()
+    public partial class Baker : Baker<NPC>
+    {
+        public override void Bake(NPC authoring)
         {
-            Walk();
+            Entity entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            // Add NavMeshAgent component with provided controller reference
+            AddComponentObject<NavMeshAgent>(entity, authoring.controller);
+
+            // Add a new component data for NavMeshAgentComponent
+            var navMeshAgentComponentData = new NavMeshAgentComponent();
+            AddComponent(entity, navMeshAgentComponentData);
         }
-
-
+    }
+    
+    public partial class TestSytem : SystemBase
+    {
+        protected override void OnUpdate()
+        {
+            Debug.Log("Test System");
+            float3 targetPosition = float3.zero;
+            foreach (var (agent, entity) in SystemAPI.Query <RefRW<NavMeshAgentComponent>>().WithEntityAccess())
+            {
+                Debug.Log("Test System2");
+                var agent1 = EntityManager.GetComponentObject<NavMeshAgent>(entity);
+                Debug.Log(agent1);
+                agent1.SetDestination(new Vector3(100, 0, 100));
+            }
+        }
     }
 }

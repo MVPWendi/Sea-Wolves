@@ -20,6 +20,7 @@ public partial class FirstPersonPlayerInputsSystem : SystemBase
 
     protected override void OnUpdate()
     {
+        
         foreach (var (playerInputs, player) in SystemAPI.Query<RefRW<FirstPersonPlayerInputs>, FirstPersonPlayer>().WithAll<GhostOwnerIsLocal>())
         {
             playerInputs.ValueRW.MoveInput = new float2
@@ -110,8 +111,9 @@ public partial struct FirstPersonPlayerFixedStepControlSystem : ISystem
                 characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
 
                 // Jump
+                
                 characterControl.Jump = playerInputs.JumpPressed.IsSet;
-
+                Debug.Log("JUMP: " + playerInputs.JumpPressed.IsSet);
                 SystemAPI.SetComponent(player.ControlledCharacter, characterControl);
             }
         }
