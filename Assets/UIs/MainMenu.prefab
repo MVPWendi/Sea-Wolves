@@ -1040,6 +1040,7 @@ MonoBehaviour:
   HostButton: {fileID: 121407379954957351}
   JoinButton: {fileID: 58039898960729006}
   MainButton: {fileID: 6062704455020962344}
+  ExitButton: {fileID: 1540748167120364176}
   HostConfirm: {fileID: 5476843875957932424}
   JoinConfirm: {fileID: 5849775909862735853}
   JoinIP: {fileID: 319905253855160960}

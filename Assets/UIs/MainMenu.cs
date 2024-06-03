@@ -25,7 +25,8 @@ public class MainMenu : MonoBehaviour
     private Button JoinButton;
     [SerializeField]
     private Button MainButton;
-
+    [SerializeField]
+    public Button ExitButton;
 
 
     [SerializeField]

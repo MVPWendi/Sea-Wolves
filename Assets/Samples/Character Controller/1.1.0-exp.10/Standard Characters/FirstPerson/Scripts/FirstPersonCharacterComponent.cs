@@ -23,7 +23,7 @@ public struct FirstPersonCharacterComponent : IComponentData
     public float MaxViewAngle;
     
     public Entity ViewEntity;
-
+    public Entity ViewDestination;
     [GhostField]
     public float ViewPitchDegrees;
     public quaternion ViewLocalRotation;
