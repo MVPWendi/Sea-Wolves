@@ -14,8 +14,14 @@ public class FirstPersonPlayerAuthoring : MonoBehaviour
             AddComponent(entity, new FirstPersonPlayer
             {
                 ControlledCharacter = GetEntity(authoring.ControlledCharacter, TransformUsageFlags.Dynamic),
+                Player = new Assets.Scripts.Player
+                {
+                    Health = 100,
+                    MaxHealth = 100
+                }
             });
             AddComponent<FirstPersonPlayerInputs>(entity);
+
         }
     }
 }

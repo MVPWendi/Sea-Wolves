@@ -112,6 +112,7 @@ public partial struct ServerGameSystem : ISystem
             HandleJoinRequests(ref state, ref singleton, gameResources);
             HandlePendingJoinClientTimeout(ref state, ref singleton, gameResources);
             HandleSpawnCharacter(ref state, ref singleton, gameResources);
+            HandleDisconnect(ref state, ref singleton);
     }
 
     private void BuildConnectionEntityMap(ref SystemState state, ref Singleton singleton)
@@ -232,7 +233,43 @@ public partial struct ServerGameSystem : ISystem
             }
         }
     }
+    private void HandleDisconnect(ref SystemState state, ref Singleton singleton)
+    {
+        EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
+        // Client disconnect
+        foreach (var (connectionState, ownedEntities, entity) in SystemAPI.Query<ConnectionState, DynamicBuffer<ClientOwnedEntities>>().WithEntityAccess())
+        {
+            if (connectionState.CurrentState == ConnectionState.State.Disconnected)
+            {
+                // Destroy all entities owned by client
+                for (int i = 0; i < ownedEntities.Length; i++)
+                {
+                    ecb.DestroyEntity(ownedEntities[i].Entity);
+                }
+
+                ecb.RemoveComponent<ClientOwnedEntities>(entity);
+                ecb.RemoveComponent<ConnectionState>(entity);
+            }
+        }
+
+        // Disconnect requests
+        EntityQuery disconnectRequestQuery = SystemAPI.QueryBuilder().WithAll<DisconnectRequest>().Build();
+        if (disconnectRequestQuery.CalculateEntityCount() > 0)
+        {
+
+            // Allow systems to have updated since disconnection, for cleanup
+            if (singleton.DisconnectionFramesCounter > 3)
+            {
+                Entity disposeRequestEntity = ecb.CreateEntity();
+                ecb.AddComponent(disposeRequestEntity, new GameManagementSystem.DisposeServerWorldRequest());
+                ecb.AddComponent(disposeRequestEntity, new MoveToLocalWorld());
+                ecb.DestroyEntity(disconnectRequestQuery, EntityQueryCaptureMode.AtRecord);
+            }
+
+            singleton.DisconnectionFramesCounter++;
+        }
+    }
 
     private void HandleSpawnCharacter(ref SystemState state, ref Singleton singleton, GameResources gameResources)
     {
@@ -251,7 +288,6 @@ public partial struct ServerGameSystem : ISystem
                     if (SystemAPI.HasComponent<NetworkId>(spawnRequest.ValueRW.ForConnection) &&
                         SystemAPI.HasComponent<JoinedClient>(spawnRequest.ValueRW.ForConnection))
                     {
-                        Debug.Log("Spawn server character");
                         int connectionId = SystemAPI.GetComponent<NetworkId>(spawnRequest.ValueRW.ForConnection).Value;
                         Entity playerEntity = SystemAPI.GetComponent<JoinedClient>(spawnRequest.ValueRW.ForConnection).PlayerEntity;
                         float3 randomSpawnPosition = new float3(0,0,0);

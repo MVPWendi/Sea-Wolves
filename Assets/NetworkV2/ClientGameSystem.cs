@@ -72,6 +72,7 @@ public partial struct ClientGameSystem : ISystem
         HandleSendJoinRequestOncePendingScenesLoaded(ref state, ref singleton);
         HandleCharacterSetupAndDestruction(ref state);
         HandlePendingJoinRequest(ref state, ref singleton, gameResources);
+        HandleDisconnect(ref state, ref singleton, gameResources);
     }
     private void HandleCharacterSetupAndDestruction(ref SystemState state)
     {
@@ -82,8 +83,6 @@ public partial struct ClientGameSystem : ISystem
             // Initialize local-owned characters
             foreach (var (character, owningPlayer, ghostOwner, entity) in SystemAPI.Query<FirstPersonCharacterComponent, OwningPlayer, GhostOwner>().WithAll<GhostOwnerIsLocal>().WithNone<CharacterInitialized>().WithEntityAccess())
             {
-                Debug.Log("Spawn client character");
-                Debug.Log("Added Camera to cient");
                 // Make camera follow character's view
                 ecb.AddComponent(character.ViewEntity, new MainEntityCamera { });
 
@@ -151,6 +150,43 @@ public partial struct ClientGameSystem : ISystem
 
                 ecb.DestroyEntity(entity);
             }
+        }
+    }
+    private void HandleDisconnect(ref SystemState state, ref Singleton singleton, GameResources gameResources)
+    {
+        EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+
+        // Check for connection timeout
+        if (!SystemAPI.HasSingleton<NetworkId>())
+        {
+            singleton.TimeWithoutAConnection += SystemAPI.Time.DeltaTime;
+            if (singleton.TimeWithoutAConnection > 30)
+            {
+                Entity disconnectEntity = ecb.CreateEntity();
+                ecb.AddComponent(disconnectEntity, new DisconnectRequest());
+            }
+        }
+
+        // Handle disconnecting & properly disposing world
+        EntityQuery disconnectRequestQuery = SystemAPI.QueryBuilder().WithAll<DisconnectRequest>().Build();
+        if (disconnectRequestQuery.CalculateEntityCount() > 0)
+        {
+            // Add disconnect request to connection
+            foreach (var (connection, entity) in SystemAPI.Query<NetworkId>().WithNone<NetworkStreamRequestDisconnect>().WithEntityAccess())
+            {
+                ecb.AddComponent(entity, new NetworkStreamRequestDisconnect());
+            }
+
+            // Allow systems to have updated since disconnection, for cleanup
+            if (singleton.DisconnectionFramesCounter > 3)
+            {
+                Entity disposeRequestEntity = ecb.CreateEntity();
+                ecb.AddComponent(disposeRequestEntity, new GameManagementSystem.DisposeClientWorldRequest());
+                ecb.AddComponent(disposeRequestEntity, new MoveToLocalWorld());
+                ecb.DestroyEntity(disconnectRequestQuery, EntityQueryCaptureMode.AtRecord);
+            }
+
+            singleton.DisconnectionFramesCounter++;
         }
     }
 }

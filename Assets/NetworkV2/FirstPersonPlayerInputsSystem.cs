@@ -7,6 +7,8 @@ using Unity.Transforms;
 using UnityEngine;
 using Unity.CharacterController;
 using Unity.NetCode;
+using Assets.Scripts;
+using System.Linq;
 
 [UpdateInGroup(typeof(GhostInputSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
@@ -21,7 +23,7 @@ public partial class FirstPersonPlayerInputsSystem : SystemBase
     protected override void OnUpdate()
     {
         
-        foreach (var (playerInputs, player) in SystemAPI.Query<RefRW<FirstPersonPlayerInputs>, FirstPersonPlayer>().WithAll<GhostOwnerIsLocal>())
+        foreach (var (playerInputs, player, entity) in SystemAPI.Query<RefRW<FirstPersonPlayerInputs>, FirstPersonPlayer>().WithAll<GhostOwnerIsLocal>().WithEntityAccess())
         {
             playerInputs.ValueRW.MoveInput = new float2
             {
@@ -37,6 +39,19 @@ public partial class FirstPersonPlayerInputsSystem : SystemBase
             {
                 playerInputs.ValueRW.JumpPressed.Set();
             }
+            // Обработка ввода кнопки F
+            // Устанавливаем флаг нажатия кнопки F в компоненте взаимодействия персонажа
+            bool interactKeyPressedThisFrame = Input.GetKeyDown(KeyCode.F);
+            if (interactKeyPressedThisFrame && !playerInputs.ValueRO.InteractPressed.IsSet)
+            {
+                Debug.Log("Set interact");
+                playerInputs.ValueRW.InteractPressed.Set();
+            }
+
+            // Устанавливаем флаг нажатия кнопки F в компоненте взаимодействия персонажа
+            var interactComponent = SystemAPI.GetComponent<InteractComponent>(player.ControlledCharacter);
+            interactComponent.InteractPressed = interactKeyPressedThisFrame;
+            SystemAPI.SetComponent(player.ControlledCharacter, interactComponent);
         }
     }
 }
@@ -59,6 +74,7 @@ public partial struct FirstPersonPlayerVariableStepControlSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+
         NetworkInputUtilities.GetCurrentAndPreviousTick(SystemAPI.GetSingleton<NetworkTime>(), out NetworkTick currentTick, out NetworkTick previousTick);
 
         foreach (var (playerInputsBuffer, player) in SystemAPI.Query<DynamicBuffer<InputBufferData<FirstPersonPlayerInputs>>, FirstPersonPlayer>().WithAll<Simulate>())
@@ -96,12 +112,11 @@ public partial struct FirstPersonPlayerFixedStepControlSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (playerInputs, player) in SystemAPI.Query<FirstPersonPlayerInputs, FirstPersonPlayer>().WithAll<Simulate>())
+        foreach (var (playerInputs, player, entity) in SystemAPI.Query<FirstPersonPlayerInputs, FirstPersonPlayer>().WithAll<Simulate>().WithEntityAccess())
         {
             if (SystemAPI.HasComponent<FirstPersonCharacterControl>(player.ControlledCharacter))
             {
                 FirstPersonCharacterControl characterControl = SystemAPI.GetComponent<FirstPersonCharacterControl>(player.ControlledCharacter);
-
                 quaternion characterRotation = SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Rotation;
 
                 // Move
@@ -113,7 +128,6 @@ public partial struct FirstPersonPlayerFixedStepControlSystem : ISystem
                 // Jump
                 
                 characterControl.Jump = playerInputs.JumpPressed.IsSet;
-                Debug.Log("JUMP: " + playerInputs.JumpPressed.IsSet);
                 SystemAPI.SetComponent(player.ControlledCharacter, characterControl);
             }
         }

@@ -6,11 +6,13 @@ using Unity.CharacterController;
 using Unity.Physics;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
+using Assets.Scripts;
 
 [DisallowMultipleComponent]
 public class FirstPersonCharacterAuthoring : MonoBehaviour
 {
     public GameObject ViewEntity;
+    public GameObject ViewDestination;
     public AuthoringKinematicCharacterProperties CharacterProperties = AuthoringKinematicCharacterProperties.GetDefault();
    
     public float GroundMaxSpeed = 10f;
@@ -48,8 +50,15 @@ public class FirstPersonCharacterAuthoring : MonoBehaviour
                 MaxViewAngle = authoring.MaxViewAngle,
                 
                 ViewEntity = GetEntity(authoring.ViewEntity, TransformUsageFlags.Dynamic),
+                ViewDestination = GetEntity(authoring.ViewDestination, TransformUsageFlags.Dynamic),
                 ViewPitchDegrees = 0f,
                 ViewLocalRotation = quaternion.identity,
+            });
+            AddComponent(entity, new InteractComponent
+            {
+                Distance = 10f,
+                ViewPoint = GetEntity(authoring.ViewEntity, TransformUsageFlags.Dynamic),
+                ViewDestination = GetEntity(authoring.ViewDestination, TransformUsageFlags.Dynamic),
             });
             AddComponent(entity, new FirstPersonCharacterControl());
             AddComponent(entity, new OwningPlayer());

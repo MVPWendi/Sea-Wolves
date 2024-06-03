@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using TMPro;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.NetCode;
 using Unity.Networking.Transport;
 using UnityEngine;
 using UnityEngine.UI;
+using static ClientGameSystem;
 
 namespace Assets.UIs
 {
@@ -30,6 +32,7 @@ namespace Assets.UIs
         [SerializeField]
         private Button JoinConfirm;
 
+        private Button ExitButton;
         [SerializeField]
         private TMP_InputField JoinIP;
         public void SetUIReferences(MainMenu menu)
@@ -37,8 +40,20 @@ namespace Assets.UIs
             HostConfirm = menu.HostConfirm;
             JoinConfirm = menu.JoinConfirm;
             JoinIP = menu.JoinIP;
+            ExitButton = menu.ExitButton;
+            ExitButton.onClick.AddListener(() => OnExitClick());
             JoinConfirm.onClick.AddListener(() => OnJoinConfirmClick());
             HostConfirm.onClick.AddListener(() => OnHostConfirmClick());
+        }
+        private void OnExitClick()
+        {
+            GameManagementSystem.DisconnectRequest disconnectRequest = new GameManagementSystem.DisconnectRequest
+            {
+               
+            };
+            Entity disconnectRequestEntity = World.EntityManager.CreateEntity();
+            World.EntityManager.AddComponentData(disconnectRequestEntity, disconnectRequest);
+            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
         }
 
         private void OnJoinConfirmClick()
