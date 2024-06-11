@@ -1,0 +1,34 @@
+{
+    "name": "StalekrInput",
+    "maps": [
+        {
+            "name": "CharacterControl",
+            "id": "eca9e25b-32d4-47ae-b314-a184abcce0a2",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Value",
+                    "id": "1641a4bb-bfda-4b63-a026-9a5609af1d5c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a02356c0-8ce1-46bc-aef7-6dea6e9f0298",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

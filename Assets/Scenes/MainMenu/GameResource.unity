@@ -136,6 +136,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 102900000, guid: db6599edc3229394b9f1dc2483baaf23, type: 3}
     - target: {fileID: 488739356413254451, guid: a9f6a9541ef096e4a91d0a13bf0a67ed, type: 3}
+      propertyPath: MenuVisualsScene.SceneAsset
+      value: 
+      objectReference: {fileID: 102900000, guid: 55e3dc7ffc3b78a458ae6492468f5ade, type: 3}
+    - target: {fileID: 488739356413254451, guid: a9f6a9541ef096e4a91d0a13bf0a67ed, type: 3}
       propertyPath: GameResourcesScene.SceneAsset
       value: 
       objectReference: {fileID: 102900000, guid: d535c175f15848a46857d4121c32aeb3, type: 3}
