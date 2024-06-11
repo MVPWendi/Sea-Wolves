@@ -89,8 +89,6 @@ public partial struct ClientGameSystem : ISystem
                 BufferLookup<Child> childBufferLookup = SystemAPI.GetBufferLookup<Child>();
                 MiscUtilities.SetShadowModeInHierarchy(state.EntityManager, ecb, entity, ref childBufferLookup, UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly);
 
-
-                Debug.Log("t1");
                 // Mark initialized
                 ecb.AddComponent<CharacterInitialized>(entity);
             }
