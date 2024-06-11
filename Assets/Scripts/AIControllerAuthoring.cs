@@ -10,7 +10,6 @@ using UnityEngine;
 [Serializable]
 public struct AIController : IComponentData
 {
-    public PhysicsCategoryTags DetectionFilter;
     public float DetectionDistance;
 }
 
@@ -48,7 +47,6 @@ public partial class AIControllerSystem : SystemBase
             {
                 Position = localTransform.Position,
                 MaxDistance = aiController.DetectionDistance,
-                Filter = new CollisionFilter { BelongsTo = CollisionFilter.Default.BelongsTo, CollidesWith = aiController.DetectionFilter.Value },
             };
             physicsWorld.CalculateDistance(distInput, ref hitsCollector);
 
