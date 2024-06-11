@@ -9,20 +9,29 @@ using Unity.CharacterController;
 using Unity.NetCode;
 using Assets.Scripts;
 using System.Linq;
-
+using System;
+using System.Collections.Generic;
+using UnityEngine.XR;
+using UnityEngine.InputSystem;
+using JetBrains.Annotations;
 [UpdateInGroup(typeof(GhostInputSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public partial class FirstPersonPlayerInputsSystem : SystemBase
 {
+    private StalekrInput input;
     protected override void OnCreate()
     {
         RequireForUpdate<NetworkTime>();
         RequireForUpdate(SystemAPI.QueryBuilder().WithAll<FirstPersonPlayer, FirstPersonPlayerInputs>().Build());
+        // Create the input user
+        input = new StalekrInput();
+        input.Enable();
+        input.CharacterControl.Enable();
     }
 
     protected override void OnUpdate()
     {
-        
+
         foreach (var (playerInputs, player, entity) in SystemAPI.Query<RefRW<FirstPersonPlayerInputs>, FirstPersonPlayer>().WithAll<GhostOwnerIsLocal>().WithEntityAccess())
         {
             playerInputs.ValueRW.MoveInput = new float2
@@ -38,19 +47,21 @@ public partial class FirstPersonPlayerInputsSystem : SystemBase
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 playerInputs.ValueRW.JumpPressed.Set();
+                Debug.Log("SET JUMP");
             }
+
             // Обработка ввода кнопки F
-            // Устанавливаем флаг нажатия кнопки F в компоненте взаимодействия персонажа
             bool interactKeyPressedThisFrame = Input.GetKeyDown(KeyCode.F);
-            if (interactKeyPressedThisFrame && !playerInputs.ValueRO.InteractPressed.IsSet)
+
+            playerInputs.ValueRW.InteractPressed = default;
+            if (input.CharacterControl.Newaction.WasPressedThisFrame())
             {
-                Debug.Log("Set interact");
+                Debug.Log("Set");
                 playerInputs.ValueRW.InteractPressed.Set();
             }
 
-            // Устанавливаем флаг нажатия кнопки F в компоненте взаимодействия персонажа
             var interactComponent = SystemAPI.GetComponent<InteractComponent>(player.ControlledCharacter);
-            interactComponent.InteractPressed = interactKeyPressedThisFrame;
+            interactComponent.InteractPressed = playerInputs.ValueRW.InteractPressed.IsSet;
             SystemAPI.SetComponent(player.ControlledCharacter, interactComponent);
         }
     }

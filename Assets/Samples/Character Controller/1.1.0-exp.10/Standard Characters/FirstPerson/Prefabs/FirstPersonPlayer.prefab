@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7698645590983583992}
   - component: {fileID: 3034224777575753810}
   - component: {fileID: 6873617990211952839}
-  - component: {fileID: -3536434564913035162}
   m_Layer: 0
   m_Name: FirstPersonPlayer
   m_TagString: Untagged
@@ -82,21 +81,3 @@ MonoBehaviour:
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
---- !u!114 &-3536434564913035162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 577874318210893199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfdaa6c06fe64fbda2b16e07a4ee0b25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ComponentOverrides:
-  - FullTypeName: Unity.Transforms.LocalTransform
-    EntityIndex: 0
-    PrefabType: -1
-    SendTypeOptimization: -1
-    VariantHash: 10188360468653526834

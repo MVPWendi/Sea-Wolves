@@ -70,7 +70,6 @@ public partial struct ClientGameSystem : ISystem
         }
         HandleCharacterSetupAndDestruction(ref state);
         HandleSendJoinRequestOncePendingScenesLoaded(ref state, ref singleton);
-        HandleCharacterSetupAndDestruction(ref state);
         HandlePendingJoinRequest(ref state, ref singleton, gameResources);
         HandleDisconnect(ref state, ref singleton, gameResources);
     }
@@ -91,7 +90,7 @@ public partial struct ClientGameSystem : ISystem
                 MiscUtilities.SetShadowModeInHierarchy(state.EntityManager, ecb, entity, ref childBufferLookup, UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly);
 
 
-
+                Debug.Log("t1");
                 // Mark initialized
                 ecb.AddComponent<CharacterInitialized>(entity);
             }
@@ -99,7 +98,7 @@ public partial struct ClientGameSystem : ISystem
             // Initialize remote characters
             foreach (var (character, owningPlayer, ghostOwner, entity) in SystemAPI.Query<FirstPersonCharacterComponent, OwningPlayer, GhostOwner>().WithNone<GhostOwnerIsLocal>().WithNone<CharacterInitialized>().WithEntityAccess())
             {
-
+                Debug.Log("t2");
                 // Mark initialized
                 ecb.AddComponent<CharacterInitialized>(entity);
             }

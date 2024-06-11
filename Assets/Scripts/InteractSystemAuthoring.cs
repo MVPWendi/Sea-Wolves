@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [BurstCompile]
@@ -24,12 +24,14 @@ namespace Assets.Scripts
     {
         public void OnCreate(ref SystemState state)
         {
+            
             state.RequireForUpdate<NetworkTime>();
             state.RequireForUpdate<PhysicsWorldSingleton>();
         }
 
         public void OnUpdate(ref SystemState state)
         {
+            return;
             foreach (var (interact, entity) in SystemAPI.Query<RefRW<InteractComponent>>().WithEntityAccess())
             {
                 if (interact.ValueRO.InteractPressed)
@@ -83,6 +85,7 @@ namespace Assets.Scripts
                 }
             }
         }
+
     }
     public struct InteractComponent : IComponentData
     {
