@@ -308,9 +308,6 @@ PrefabInstance:
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f368010e2d748aa4daa1389988df82b3, type: 3}
 --- !u!1001 &1135970442
-=======
---- !u!1001 &459682673
->>>>>>> master
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2

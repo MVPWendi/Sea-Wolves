@@ -20,10 +20,7 @@ public class GameResources : MonoBehaviour
     public GameObject PlayerGhost;
     public GameObject CharacterGhost;
 
-<<<<<<< HEAD:Assets/Network/Common/GameResourceAuthoring.cs
     public NPCDialogueUI NPCDialogue;
-=======
->>>>>>> master:Assets/Network/Common/GameResources.cs
     public class Baker : Baker<GameResources>
     {
         public override void Bake(GameResources authoring)
