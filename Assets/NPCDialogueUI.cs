@@ -1,18 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.Entities;
 using UnityEngine;
 
 public class NPCDialogueUI : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public TextMeshPro NPCName;
+}
+public struct NPCDialogueRefering : ICleanupComponentData
+{
+    public NPCDialogueUI UI;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

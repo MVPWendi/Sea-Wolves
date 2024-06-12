@@ -22,9 +22,9 @@ namespace Assets.Network.Client
         public void OnUpdate(ref SystemState state) 
         {
             GameResourcesAuthorings gameResources = SystemAPI.GetSingleton<GameResourcesAuthorings>();
-         foreach(var npc in SystemAPI.Query<NPC>().WithNone<NPCDialogueRefering>()) 
+         foreach(var (npc, entity) in SystemAPI.Query<NPC>().WithNone<NPCDialogueRefering>().WithEntityAccess()) 
             {
-                
+                var ui = gameResources.NPC
             }
             
         }
