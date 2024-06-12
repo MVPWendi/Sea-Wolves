@@ -19,8 +19,6 @@ public class GameResources : MonoBehaviour
 
     public GameObject PlayerGhost;
     public GameObject CharacterGhost;
-
-    public NPCDialogueUI NPCDialogue;
     public class Baker : Baker<GameResources>
     {
         public override void Bake(GameResources authoring)
@@ -32,10 +30,6 @@ public class GameResources : MonoBehaviour
                 CharacterGhost = GetEntity(authoring.CharacterGhost, TransformUsageFlags.Dynamic),
                 GameResourcesScene = authoring.GameResourcesScene.GetEntitySceneReference(),
                 GameScene = authoring.GameScene.GetEntitySceneReference(),
-            });
-            AddComponentObject(entity, new UIS
-            {
-                DialogueUI = authoring.NPCDialogue,
             });
         }
     }

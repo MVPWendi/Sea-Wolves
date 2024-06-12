@@ -116,10 +116,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2481375355517810183}
-  - component: {fileID: 1208357412676237419}
-  - component: {fileID: 8510126178578441825}
   - component: {fileID: 868422957147842142}
   - component: {fileID: 3890681087382260133}
+  - component: {fileID: 3169347959638154306}
   m_Layer: 0
   m_Name: NPC
   m_TagString: Untagged
@@ -143,30 +142,6 @@ Transform:
   - {fileID: 6575303722939620362}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1208357412676237419
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9194236738983033595}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 084c46886cd747b40a9e891a166f8c4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &8510126178578441825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9194236738983033595}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0199cca95a2e14d5883379f33cc211e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &868422957147842142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,3 +176,16 @@ MonoBehaviour:
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
+--- !u!114 &3169347959638154306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9194236738983033595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 084c46886cd747b40a9e891a166f8c4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: 
