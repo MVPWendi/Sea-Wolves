@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Serialization;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ public class GameResources : MonoBehaviour
     public GameObject PlayerGhost;
     public GameObject CharacterGhost;
 
+    public NPCDialogueUI NPCDialogue;
     public class Baker : Baker<GameResources>
     {
         public override void Bake(GameResources authoring)
@@ -30,6 +32,10 @@ public class GameResources : MonoBehaviour
                 CharacterGhost = GetEntity(authoring.CharacterGhost, TransformUsageFlags.Dynamic),
                 GameResourcesScene = authoring.GameResourcesScene.GetEntitySceneReference(),
                 GameScene = authoring.GameScene.GetEntitySceneReference(),
+            });
+            AddComponentObject(entity, new UIS
+            {
+                DialogueUI = authoring.NPCDialogue,
             });
         }
     }

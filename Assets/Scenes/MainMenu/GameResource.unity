@@ -132,6 +132,14 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 488739356413254451, guid: a9f6a9541ef096e4a91d0a13bf0a67ed, type: 3}
+      propertyPath: NPCDialogue
+      value: 
+      objectReference: {fileID: 1803547523264146361, guid: 200820230a593a44a9faad001fc7df8a, type: 3}
+    - target: {fileID: 488739356413254451, guid: a9f6a9541ef096e4a91d0a13bf0a67ed, type: 3}
+      propertyPath: npcDialogueUI
+      value: 
+      objectReference: {fileID: 1803547523264146361, guid: 200820230a593a44a9faad001fc7df8a, type: 3}
+    - target: {fileID: 488739356413254451, guid: a9f6a9541ef096e4a91d0a13bf0a67ed, type: 3}
       propertyPath: GameScene.SceneAsset
       value: 
       objectReference: {fileID: 102900000, guid: db6599edc3229394b9f1dc2483baaf23, type: 3}
