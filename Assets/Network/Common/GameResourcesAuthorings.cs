@@ -15,6 +15,7 @@ namespace Assets.Network
         public EntitySceneReference GameScene;
         public Entity PlayerGhost;
         public Entity CharacterGhost;
+
         public ClientServerTickRate GetClientServerTickRate()
         {
             ClientServerTickRate tickRate = new ClientServerTickRate();

@@ -6,10 +6,10 @@ using UnityEngine;
 
 public class NPCDialogueUI : MonoBehaviour
 {
-    public TextMeshPro NPCName;
+    public TMP_Text NPCName;
 }
-public struct NPCDialogueRefering : ICleanupComponentData
-{
-    public NPCDialogueUI UI;
 
+public class UIS : IComponentData
+{
+    public NPCDialogueUI DialogueUI;
 }

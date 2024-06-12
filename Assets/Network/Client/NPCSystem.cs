@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine;
 
 namespace Assets.Network.Client
 {
-   // [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial struct NPCSystem : ISystem
     {
         public void OnCreate(ref SystemState state) 
@@ -21,14 +22,24 @@ namespace Assets.Network.Client
 
         public void OnUpdate(ref SystemState state) 
         {
+            Debug.Log("NPC ");
             GameResourcesAuthorings gameResources = SystemAPI.GetSingleton<GameResourcesAuthorings>();
-         foreach(var (npc, entity) in SystemAPI.Query<NPC>().WithNone<NPCDialogueRefering>().WithEntityAccess()) 
+            var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+            foreach(var (npc, entity) in SystemAPI.Query<NPC>().WithNone<ShowUITag>().WithEntityAccess()) 
             {
-                var ui = gameResources.NPC
+                var dialogueUI = SystemAPI.ManagedAPI.GetSingleton<UIS>().DialogueUI;
+                var newUI = GameObject.Instantiate(dialogueUI);
+                dialogueUI.NPCName.text = npc.Name.ToString();
+                ecb.AddComponent(entity, new ShowUITag());
             }
-            
+            ecb.Playback(state.EntityManager);
         }
 
+
+    }
+
+    public struct ShowUITag : IComponentData
+    {
 
     }
 }
