@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5458968286719104160}
   - component: {fileID: 5436362159496403395}
   - component: {fileID: 7027172203110066599}
-  - component: {fileID: 3877603973531312406}
   - component: {fileID: 8618600617101555907}
   - component: {fileID: 6676384862252729720}
   m_Layer: 0
@@ -109,20 +108,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 8385cee3fbea98b48b2a8f21f7ecf232, type: 3}
---- !u!114 &3877603973531312406
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3022890388878096555}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e6a41e91f2f3df4d898c2c8703b8c61, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Name: HYI
-  Test: 0
 --- !u!114 &8618600617101555907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,7 +136,7 @@ MonoBehaviour:
   SupportedGhostModes: 3
   OptimizationMode: 1
   Importance: 1
-  prefabId: 
+  prefabId: 957ebdec55b34db47ad4500c75168b57
   HasOwner: 0
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 0
