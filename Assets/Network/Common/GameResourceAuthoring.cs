@@ -8,8 +8,9 @@ using Unity.Entities.Serialization;
 using UnityEditor;
 using UnityEngine;
 
-public class GameResourcesAuthoring : MonoBehaviour
+public class GameResources : MonoBehaviour
 {
+    public NPCDialogueUI npcDialogueUI;
 
     [Header("Scenes")]
     public BakedSubSceneReference MenuVisualsScene;
@@ -19,9 +20,9 @@ public class GameResourcesAuthoring : MonoBehaviour
     public GameObject PlayerGhost;
     public GameObject CharacterGhost;
 
-    public class Baker : Baker<GameResourcesAuthoring>
+    public class Baker : Baker<GameResources>
     {
-        public override void Bake(GameResourcesAuthoring authoring)
+        public override void Bake(GameResources authoring)
         {
             Entity entity = GetEntity(TransformUsageFlags.None);
             AddComponent(entity, new GameResourcesAuthorings
@@ -31,6 +32,7 @@ public class GameResourcesAuthoring : MonoBehaviour
                 GameResourcesScene = authoring.GameResourcesScene.GetEntitySceneReference(),
                 GameScene = authoring.GameScene.GetEntitySceneReference(),
             });
+            AddComponentObject(entity, authoring.npcDialogueUI);
         }
     }
 }
