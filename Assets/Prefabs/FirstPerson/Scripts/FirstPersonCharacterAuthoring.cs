@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using UnityEngine.Serialization;
 using Assets.Scripts;
 using Assets;
+using Assets.Components;
 
 [DisallowMultipleComponent]
 public class FirstPersonCharacterAuthoring : MonoBehaviour
@@ -61,6 +62,10 @@ public class FirstPersonCharacterAuthoring : MonoBehaviour
             });
             AddComponent(entity, new FirstPersonCharacterControl());
             AddComponent(entity, new OwningPlayer());
+            AddComponent(entity, new CharacterStatsComponent());
+            AddComponent(entity, new HealthComponent { CurrentHealth = 100, MaxHealth = 100});
+            AddComponent(entity, new InventoryComponent());
+            AddBuffer<Item>(entity);
         }
     }
 }

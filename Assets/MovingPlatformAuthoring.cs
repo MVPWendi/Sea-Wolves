@@ -50,7 +50,6 @@ public partial class MovingPlatformSystem : SystemBase
 
         foreach (var (movingPlatform, physicsVelocity, physicsMass, localTransform, entity) in SystemAPI.Query<RefRW<MovingPlatform>, RefRW<PhysicsVelocity>, PhysicsMass, LocalTransform>().WithEntityAccess())
         {
-            Debug.Log("Move system");
             if (!movingPlatform.ValueRW.IsInitialized)
             {
                 // Remember initial pos/rot, because our calculations depend on them
@@ -62,8 +61,6 @@ public partial class MovingPlatformSystem : SystemBase
             float3 targetPos = movingPlatform.ValueRW.OriginalPosition + (math.normalizesafe(movingPlatform.ValueRW.TranslationAxis) * math.sin(time * movingPlatform.ValueRW.TranslationSpeed) * movingPlatform.ValueRW.TranslationAmplitude);
             quaternion rotationFromMovement = quaternion.Euler(math.normalizesafe(movingPlatform.ValueRW.RotationAxis) * movingPlatform.ValueRW.RotationSpeed * time);
             quaternion targetRot = math.mul(rotationFromMovement, movingPlatform.ValueRW.OriginalRotation);
-            Debug.Log(entity.Index);
-            Debug.Log(targetPos);
             // Move with velocity
             physicsVelocity.ValueRW = PhysicsVelocity.CalculateVelocityToTarget(in physicsMass, localTransform.Position, localTransform.Rotation, new RigidTransform(targetRot, targetPos), invDeltaTime);
         }

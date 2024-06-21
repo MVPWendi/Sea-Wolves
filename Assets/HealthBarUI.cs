@@ -1,6 +1,8 @@
+using Assets.Components;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +16,7 @@ public class HealthBarUI : MonoBehaviour
 
 
 
+
     private void Start()
     {
         Slider.maxValue = MaxHealth;
@@ -21,10 +24,14 @@ public class HealthBarUI : MonoBehaviour
         Slider.value = Health;
     }
 
-
-    private void Update()
+    public void UpdateHealth()
     {
         Slider.value = Health;
         HealthText.text = ((int)math.round(Health)).ToString();
+    }
+
+    private void Update()
+    {
+        
     }
 }
