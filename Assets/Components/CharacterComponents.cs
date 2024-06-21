@@ -40,10 +40,5 @@ namespace Assets.Components
 
     }
 
-    public struct Item : IBufferElementData
-    {
-        public Entity Model;
-        public FixedString128Bytes Name;
-        public int Amount;
-    }
+    
 }

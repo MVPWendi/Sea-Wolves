@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace Assets.Systems
 {
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial struct PlayerCharacterSystems : ISystem
     {
         public void OnUpdate(ref SystemState state)
