@@ -160,6 +160,7 @@ public partial class GameManagementSystem : SystemBase
 
         foreach (var (request, entity) in SystemAPI.Query<RefRO<JoinRequest>>().WithEntityAccess())
         {
+            Debug.Log("GMS 1");
             if (!WorldUtilities.IsValidAndCreated(ClientWorld))
             {
                 // Create client world
@@ -191,14 +192,15 @@ public partial class GameManagementSystem : SystemBase
                 });
 
             }
-
+            Debug.Log("GMS 2");
             ecb.DestroyEntity(entity);
             break;
         }
-
+        Debug.Log("GMS 3");
         if (WorldUtilities.IsValidAndCreated(ClientWorld))
         {
             clientECB.Playback(ClientWorld.EntityManager);
+            Debug.Log("GMS 4");
         }
         clientECB.Dispose();
     }

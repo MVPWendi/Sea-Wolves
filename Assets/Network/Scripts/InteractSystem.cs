@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -23,15 +24,15 @@ namespace Assets
         {
             state.RequireForUpdate<NetworkTime>();
             state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            state.Enabled = false;
         }
 
         public void OnUpdate(ref SystemState state)
         {
 
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            if (!networkTime.IsFirstTimeFullyPredictingTick) return;
+            if (networkTime.ServerTick.IsValid && !networkTime.IsFirstTimeFullyPredictingTick) return;
             var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
-            var currentTick = networkTime.ServerTick;
 
             foreach (var (player, input, entity) in SystemAPI.Query<RefRW<FirstPersonPlayer>, FirstPersonPlayerInputs>().WithAll<Simulate>().WithEntityAccess())
             {
@@ -73,10 +74,15 @@ namespace Assets
                 // Выполняем рейкаст
                 if (physicsWorld.CastRay(raycastInput, out var hit))
                 {
-                    Debug.Log("hit: " + hit.Entity.Index);
+                    
+                    if(state.EntityManager.HasComponent<NPCComponent>(hit.Entity))
+                    {
+                        Debug.Log("hit: " + hit.Entity.Index);
+                    }
                 }
             }
             ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
     }
     public enum CollisionLayers

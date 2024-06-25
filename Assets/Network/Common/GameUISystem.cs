@@ -13,6 +13,7 @@ using UnityEngine.UI;
 
 namespace Assets.UIs
 {
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial class GameUISystem : SystemBase
     {
 
@@ -76,6 +77,7 @@ namespace Assets.UIs
             
             if (NetworkEndpoint.TryParse(GameManagementSystem.LocalHost, 6666, out NetworkEndpoint newLocalClientEndPoint))
             {
+                Debug.Log("UI 1");
                 NetworkEndpoint newServerEndPoint = NetworkEndpoint.AnyIpv4;
                 newServerEndPoint.Port = 6666;
                 GameManagementSystem.HostRequest hostRequest = new GameManagementSystem.HostRequest
@@ -84,7 +86,7 @@ namespace Assets.UIs
                 };
                 Entity hostRequestEntity = World.EntityManager.CreateEntity();
                 World.EntityManager.AddComponentData(hostRequestEntity, hostRequest);
-
+                Debug.Log("UI 2");
                 // Only create local client if not in server mode
 #if !UNITY_SERVER
                 GameManagementSystem.JoinRequest joinRequest = new GameManagementSystem.JoinRequest
@@ -93,6 +95,7 @@ namespace Assets.UIs
                 };
                 Entity joinRequestEntity = World.EntityManager.CreateEntity();
                 World.EntityManager.AddComponentData(joinRequestEntity, joinRequest);
+                Debug.Log("UI 3");
 #endif
             }
             else
