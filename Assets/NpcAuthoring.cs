@@ -1,3 +1,5 @@
+using Assets;
+using Assets.Components;
 using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,28 +7,23 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-public class NpcAuthoring : MonoBehaviour
+public class NPCAuthoring : MonoBehaviour
 {
     public string Name;
-
-    public class Baker : Baker<NpcAuthoring>
+    public DialogueSO Dialogue;
+    public class Baker : Baker<NPCAuthoring>
     {
-        
-        public override void Bake(NpcAuthoring authoring)
+
+        public override void Bake(NPCAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
-            AddComponent(entity, new NPC
+            AddComponent(entity, new NPCComponent
             {
-                Name = new FixedString128Bytes(authoring.Name)
+                Name = new FixedString128Bytes(authoring.Name),
             });
-                
 
-            
+
+
         }
     }
-}
-
-public struct NPC : IComponentData
-{
-    public FixedString128Bytes Name;
 }
