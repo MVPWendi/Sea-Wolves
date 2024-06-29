@@ -75,9 +75,9 @@ public partial struct GoInGameServerSystem : ISystem
         {
             
             // Request to spawn character
-            //Entity spawnCharacterRequestEntity = commandBuffer.CreateEntity();
-            //commandBuffer.AddComponent(spawnCharacterRequestEntity, new CharacterSpawnRequest { ForConnection = reqSrc.ValueRO.SourceConnection });
-            commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
+            Entity spawnCharacterRequestEntity = commandBuffer.CreateEntity();
+            commandBuffer.AddComponent(spawnCharacterRequestEntity, new CharacterSpawnRequest { ForConnection = reqSrc.ValueRO.SourceConnection });
+            //commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
             var networkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection];
 
             Debug.Log($"'{worldName}' setting connection '{networkId.Value}' to in game");
