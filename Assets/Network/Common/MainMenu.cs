@@ -70,7 +70,7 @@ public class MainMenu : MonoBehaviour
         //and other issues.
         if (World.DefaultGameObjectInjectionWorld == null)
             World.DefaultGameObjectInjectionWorld = server;
-        SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+        SceneManager.LoadScene(1, LoadSceneMode.Additive);
 
 
         NetworkEndpoint ep = NetworkEndpoint.AnyIpv4.WithPort(7777);
@@ -92,7 +92,7 @@ public class MainMenu : MonoBehaviour
 
         if (World.DefaultGameObjectInjectionWorld == null)
             World.DefaultGameObjectInjectionWorld = client;
-        SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+        SceneManager.LoadScene(1, LoadSceneMode.Additive);
 
         var ep = NetworkEndpoint.Parse("26.106.161.104", 7777);
         {
