@@ -11,8 +11,6 @@ namespace Assets.Network
 {
     public struct GameResourcesAuthorings : IComponentData
     {
-        public EntitySceneReference GameResourcesScene;
-        public EntitySceneReference GameScene;
         public Entity PlayerGhost;
         public Entity CharacterGhost;
 
