@@ -1,312 +1,312 @@
-using Assets.Network;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
-using Unity.CharacterController;
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Entities.Serialization;
-using Unity.Mathematics;
-using Unity.NetCode;
-using Unity.Networking.Transport;
-using Unity.Scenes;
-using Unity.Transforms;
-using UnityEngine;
+//using Assets.Network;
+//using System;
+//using System.Collections;
+//using System.Collections.Generic;
+//using Unity.Burst;
+//using Unity.CharacterController;
+//using Unity.Collections;
+//using Unity.Entities;
+//using Unity.Entities.Serialization;
+//using Unity.Mathematics;
+//using Unity.NetCode;
+//using Unity.Networking.Transport;
+//using Unity.Scenes;
+//using Unity.Transforms;
+//using UnityEngine;
 
-[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-[UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
-[BurstCompile]
-public partial struct ServerGameSystem : ISystem
-{
-    public struct Singleton : IComponentData
-    {
-        public bool RequestingDisconnect;
+//[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+//[UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
+//[BurstCompile]
+//public partial struct ServerGameSystem : ISystem
+//{
+//    public struct Singleton : IComponentData
+//    {
+//        public bool RequestingDisconnect;
 
-        public Unity.Mathematics.Random Random;
-        public bool AcceptJoins;
+//        public Unity.Mathematics.Random Random;
+//        public bool AcceptJoins;
 
-        public int DisconnectionFramesCounter;
-        public NativeHashMap<int, Entity> ConnectionEntityMap;
-    }
+//        public int DisconnectionFramesCounter;
+//        public NativeHashMap<int, Entity> ConnectionEntityMap;
+//    }
 
-    public struct AcceptJoinsOnceScenesLoadedRequest : IComponentData
-    {
-        public Entity PendingSceneLoadRequest;
-    }
+//    public struct AcceptJoinsOnceScenesLoadedRequest : IComponentData
+//    {
+//        public Entity PendingSceneLoadRequest;
+//    }
 
-    public struct PendingClient : IComponentData
-    {
-        public float TimeConnected;
-        public bool IsJoining;
-    }
+//    public struct PendingClient : IComponentData
+//    {
+//        public float TimeConnected;
+//        public bool IsJoining;
+//    }
 
-    public struct JoinedClient : IComponentData
-    {
-        public Entity PlayerEntity;
-    }
+//    public struct JoinedClient : IComponentData
+//    {
+//        public Entity PlayerEntity;
+//    }
 
-    public struct JoinRequestAccepted : IRpcCommand
-    {
-    }
+//    public struct JoinRequestAccepted : IRpcCommand
+//    {
+//    }
 
-    public struct ClientOwnedEntities : ICleanupBufferElementData
-    {
-        public Entity Entity;
-    }
+//    public struct ClientOwnedEntities : ICleanupBufferElementData
+//    {
+//        public Entity Entity;
+//    }
 
-    public struct DisconnectRequest : IComponentData
-    {
-    }
+//    public struct DisconnectRequest : IComponentData
+//    {
+//    }
 
-    public struct CharacterSpawnRequest : IComponentData
-    {
-        public Entity ForConnection;
-        public float Delay;
-    }
+//    public struct CharacterSpawnRequest : IComponentData
+//    {
+//        public Entity ForConnection;
+//        public float Delay;
+//    }
 
-    private EntityQuery _joinRequestQuery;
-    private EntityQuery _connectionsQuery;
-    private NativeHashMap<int, Entity> _connectionEntityMap;
+//    private EntityQuery _joinRequestQuery;
+//    private EntityQuery _connectionsQuery;
+//    private NativeHashMap<int, Entity> _connectionEntityMap;
 
-    public void OnCreate(ref SystemState state)
-    {
-        state.RequireForUpdate<GameResourcesAuthorings>();
+//    public void OnCreate(ref SystemState state)
+//    {
+//        state.RequireForUpdate<GameResourcesAuthorings>();
 
-        _joinRequestQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<ClientGameSystem.JoinRequest, ReceiveRpcCommandRequest>().Build(ref state);
-        _connectionsQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<NetworkId>().Build(state.EntityManager);
+//        _joinRequestQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<ClientGameSystem.JoinRequest, ReceiveRpcCommandRequest>().Build(ref state);
+//        _connectionsQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<NetworkId>().Build(state.EntityManager);
 
-        _connectionEntityMap = new NativeHashMap<int, Entity>(300, Allocator.Persistent);
-        
-        // Auto-create singleton
-        uint randomSeed = (uint)DateTime.Now.Millisecond;
-        Entity singletonEntity = state.EntityManager.CreateEntity();
-        state.EntityManager.AddComponentData(singletonEntity, new Singleton
-        {
-            Random = Unity.Mathematics.Random.CreateFromIndex(randomSeed),
-            ConnectionEntityMap = this._connectionEntityMap,
-        });
-    }
+//        _connectionEntityMap = new NativeHashMap<int, Entity>(300, Allocator.Persistent);
 
-    public void OnDestroy(ref SystemState state)
-    {
-        if (_connectionEntityMap.IsCreated)
-        {
-            _connectionEntityMap.Dispose();
-        }
-    }
+//        // Auto-create singleton
+//        uint randomSeed = (uint)DateTime.Now.Millisecond;
+//        Entity singletonEntity = state.EntityManager.CreateEntity();
+//        state.EntityManager.AddComponentData(singletonEntity, new Singleton
+//        {
+//            Random = Unity.Mathematics.Random.CreateFromIndex(randomSeed),
+//            ConnectionEntityMap = this._connectionEntityMap,
+//        });
+//    }
 
-    [BurstCompile]
-    public void OnUpdate(ref SystemState state)
-    {
-        ref Singleton singleton = ref SystemAPI.GetSingletonRW<Singleton>().ValueRW;
-        GameResourcesAuthorings gameResources = SystemAPI.GetSingleton<GameResourcesAuthorings>();
+//    public void OnDestroy(ref SystemState state)
+//    {
+//        if (_connectionEntityMap.IsCreated)
+//        {
+//            _connectionEntityMap.Dispose();
+//        }
+//    }
 
-        if (SystemAPI.HasSingleton<DisableCharacterDynamicContacts>())
-        {
-            state.EntityManager.DestroyEntity(SystemAPI.GetSingletonEntity<DisableCharacterDynamicContacts>());
-        }
+//    [BurstCompile]
+//    public void OnUpdate(ref SystemState state)
+//    {
+//        ref Singleton singleton = ref SystemAPI.GetSingletonRW<Singleton>().ValueRW;
+//        GameResourcesAuthorings gameResources = SystemAPI.GetSingleton<GameResourcesAuthorings>();
 
-            BuildConnectionEntityMap(ref state, ref singleton);
-            HandleAcceptJoinsOncePendingScenesAreLoaded(ref state, ref singleton);
-            HandleJoinRequests(ref state, ref singleton, gameResources);
-            HandlePendingJoinClientTimeout(ref state, ref singleton, gameResources);
-            HandleSpawnCharacter(ref state, ref singleton, gameResources);
-            HandleDisconnect(ref state, ref singleton);
-    }
+//        if (SystemAPI.HasSingleton<DisableCharacterDynamicContacts>())
+//        {
+//            state.EntityManager.DestroyEntity(SystemAPI.GetSingletonEntity<DisableCharacterDynamicContacts>());
+//        }
 
-    private void BuildConnectionEntityMap(ref SystemState state, ref Singleton singleton)
-    {
-        NativeArray<Entity> connectionEntities = _connectionsQuery.ToEntityArray(state.WorldUpdateAllocator);
-        NativeArray<NetworkId> connections = _connectionsQuery.ToComponentDataArray<NetworkId>(state.WorldUpdateAllocator);
-        
-        singleton.ConnectionEntityMap.Clear();
-        for (int i = 0; i < connections.Length; i++)
-        {
-            singleton.ConnectionEntityMap.TryAdd(connections[i].Value, connectionEntities[i]);
-        }
+//        BuildConnectionEntityMap(ref state, ref singleton);
+//        HandleAcceptJoinsOncePendingScenesAreLoaded(ref state, ref singleton);
+//        HandleJoinRequests(ref state, ref singleton, gameResources);
+//        HandlePendingJoinClientTimeout(ref state, ref singleton, gameResources);
+//        HandleSpawnCharacter(ref state, ref singleton, gameResources);
+//        HandleDisconnect(ref state, ref singleton);
+//    }
 
-        connectionEntities.Dispose(state.Dependency);
-        connections.Dispose(state.Dependency);
-    }
-    
-    private void HandleAcceptJoinsOncePendingScenesAreLoaded(ref SystemState state, ref Singleton singleton)
-    {
-        EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//    private void BuildConnectionEntityMap(ref SystemState state, ref Singleton singleton)
+//    {
+//        NativeArray<Entity> connectionEntities = _connectionsQuery.ToEntityArray(state.WorldUpdateAllocator);
+//        NativeArray<NetworkId> connections = _connectionsQuery.ToComponentDataArray<NetworkId>(state.WorldUpdateAllocator);
 
-        foreach (var (request, entity) in SystemAPI.Query<AcceptJoinsOnceScenesLoadedRequest>().WithEntityAccess())
-        {
-            if (SystemAPI.HasComponent<SceneLoadRequest>(request.PendingSceneLoadRequest) && SystemAPI.GetComponent<SceneLoadRequest>(request.PendingSceneLoadRequest).IsLoaded)
-            {
-                singleton.AcceptJoins = true;
-                ecb.DestroyEntity(request.PendingSceneLoadRequest);
-                ecb.DestroyEntity(entity);
-            }
-        }
-    }
+//        singleton.ConnectionEntityMap.Clear();
+//        for (int i = 0; i < connections.Length; i++)
+//        {
+//            singleton.ConnectionEntityMap.TryAdd(connections[i].Value, connectionEntities[i]);
+//        }
 
-    private void HandlePendingJoinClientTimeout(ref SystemState state, ref Singleton singleton, GameResourcesAuthorings gameResources)
-    {
-        // Add ConnectionState component
-        {
-            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//        connectionEntities.Dispose(state.Dependency);
+//        connections.Dispose(state.Dependency);
+//    }
 
-            foreach (var (netId, entity) in SystemAPI.Query<NetworkId>().WithNone<ConnectionState>().WithEntityAccess())
-            {
-                ecb.AddComponent(entity, new ConnectionState());
-            }
-        }
+//    private void HandleAcceptJoinsOncePendingScenesAreLoaded(ref SystemState state, ref Singleton singleton)
+//    {
+//        EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
-        // Mark unjoined clients as pending
-        {
-            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//        foreach (var (request, entity) in SystemAPI.Query<AcceptJoinsOnceScenesLoadedRequest>().WithEntityAccess())
+//        {
+//            if (SystemAPI.HasComponent<SceneLoadRequest>(request.PendingSceneLoadRequest) && SystemAPI.GetComponent<SceneLoadRequest>(request.PendingSceneLoadRequest).IsLoaded)
+//            {
+//                singleton.AcceptJoins = true;
+//                ecb.DestroyEntity(request.PendingSceneLoadRequest);
+//                ecb.DestroyEntity(entity);
+//            }
+//        }
+//    }
 
-            foreach (var (netId, entity) in SystemAPI.Query<NetworkId>().WithNone<PendingClient>().WithNone<JoinedClient>().WithEntityAccess())
-            {
-                ecb.AddComponent(entity, new PendingClient());
-            }
-        }
+//    private void HandlePendingJoinClientTimeout(ref SystemState state, ref Singleton singleton, GameResourcesAuthorings gameResources)
+//    {
+//        // Add ConnectionState component
+//        {
+//            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
-        // Handle join timeout for pending clients
-        {
-            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//            foreach (var (netId, entity) in SystemAPI.Query<NetworkId>().WithNone<ConnectionState>().WithEntityAccess())
+//            {
+//                ecb.AddComponent(entity, new ConnectionState());
+//            }
+//        }
 
-            foreach (var (netId, pendingCLient, entity) in SystemAPI.Query<NetworkId, RefRW<PendingClient>>().WithEntityAccess())
-            {
-                pendingCLient.ValueRW.TimeConnected += SystemAPI.Time.DeltaTime;
-                if (pendingCLient.ValueRW.TimeConnected > 15)
-                {
-                    ecb.DestroyEntity(entity);
-                }
-            }
-        }
-    }
+//        // Mark unjoined clients as pending
+//        {
+//            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
-    private void HandleJoinRequests(ref SystemState state, ref Singleton singleton, GameResourcesAuthorings gameResources)
-    {
-        if (singleton.AcceptJoins && _joinRequestQuery.CalculateEntityCount() > 0)
-        {
-            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//            foreach (var (netId, entity) in SystemAPI.Query<NetworkId>().WithNone<PendingClient>().WithNone<JoinedClient>().WithEntityAccess())
+//            {
+//                ecb.AddComponent(entity, new PendingClient());
+//            }
+//        }
 
-            // Process join requests
-            foreach (var (request, rpcReceive, entity) in SystemAPI.Query<ClientGameSystem.JoinRequest, ReceiveRpcCommandRequest>().WithEntityAccess())
-            {
-                if (SystemAPI.HasComponent<NetworkId>(rpcReceive.SourceConnection) &&
-                    !SystemAPI.HasComponent<JoinedClient>(rpcReceive.SourceConnection))
-                {
-                    int ownerConnectionId = SystemAPI.GetComponent<NetworkId>(rpcReceive.SourceConnection).Value;
+//        // Handle join timeout for pending clients
+//        {
+//            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
-                    // Mark connection as joined
-                    ecb.RemoveComponent<PendingClient>(rpcReceive.SourceConnection);
-                    ecb.AddBuffer<ClientOwnedEntities>(rpcReceive.SourceConnection);
+//            foreach (var (netId, pendingCLient, entity) in SystemAPI.Query<NetworkId, RefRW<PendingClient>>().WithEntityAccess())
+//            {
+//                pendingCLient.ValueRW.TimeConnected += SystemAPI.Time.DeltaTime;
+//                if (pendingCLient.ValueRW.TimeConnected > 15)
+//                {
+//                    ecb.DestroyEntity(entity);
+//                }
+//            }
+//        }
+//    }
 
-                    Entity playerEntity = Entity.Null;
-                    // Spawn player
-                    playerEntity = ecb.Instantiate(gameResources.PlayerGhost);
-                    ecb.SetComponent(playerEntity, new GhostOwner { NetworkId = ownerConnectionId });
-                    ecb.AppendToBuffer(rpcReceive.SourceConnection, new ClientOwnedEntities { Entity = playerEntity });
-                    
-                    // Set player data
-                    FirstPersonPlayer player = SystemAPI.GetComponent<FirstPersonPlayer>(gameResources.PlayerGhost);
-                    ecb.SetComponent(playerEntity, player);
+//    private void HandleJoinRequests(ref SystemState state, ref Singleton singleton, GameResourcesAuthorings gameResources)
+//    {
+//        if (singleton.AcceptJoins && _joinRequestQuery.CalculateEntityCount() > 0)
+//        {
+//            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
-                    if (!request.Spectator)
-                    { 
-                        // Request to spawn character
-                        Entity spawnCharacterRequestEntity = ecb.CreateEntity();
-                        ecb.AddComponent(spawnCharacterRequestEntity, new CharacterSpawnRequest { ForConnection = rpcReceive.SourceConnection, Delay = -1f });
-                    }
+//            // Process join requests
+//            foreach (var (request, rpcReceive, entity) in SystemAPI.Query<ClientGameSystem.JoinRequest, ReceiveRpcCommandRequest>().WithEntityAccess())
+//            {
+//                if (SystemAPI.HasComponent<NetworkId>(rpcReceive.SourceConnection) &&
+//                    !SystemAPI.HasComponent<JoinedClient>(rpcReceive.SourceConnection))
+//                {
+//                    int ownerConnectionId = SystemAPI.GetComponent<NetworkId>(rpcReceive.SourceConnection).Value;
 
-                    // Remember player for connection
-                    ecb.AddComponent(rpcReceive.SourceConnection, new JoinedClient { PlayerEntity = playerEntity });
+//                    // Mark connection as joined
+//                    ecb.RemoveComponent<PendingClient>(rpcReceive.SourceConnection);
+//                    ecb.AddBuffer<ClientOwnedEntities>(rpcReceive.SourceConnection);
 
-                    // Accept join request
-                    Entity joinRequestAcceptedEntity = state.EntityManager.CreateEntity();
-                    ecb.AddComponent(joinRequestAcceptedEntity, new JoinRequestAccepted());
-                    ecb.AddComponent(joinRequestAcceptedEntity, new SendRpcCommandRequest{ TargetConnection = rpcReceive.SourceConnection });
+//                    Entity playerEntity = Entity.Null;
+//                    // Spawn player
+//                    playerEntity = ecb.Instantiate(gameResources.PlayerGhost);
+//                    ecb.SetComponent(playerEntity, new GhostOwner { NetworkId = ownerConnectionId });
+//                    ecb.AppendToBuffer(rpcReceive.SourceConnection, new ClientOwnedEntities { Entity = playerEntity });
 
-                    // Stream in game
-                    ecb.AddComponent(rpcReceive.SourceConnection, new NetworkStreamInGame());
-                }
+//                    // Set player data
+//                    FirstPersonPlayer player = SystemAPI.GetComponent<FirstPersonPlayer>(gameResources.PlayerGhost);
+//                    ecb.SetComponent(playerEntity, player);
 
-                ecb.DestroyEntity(entity);
-            }
-        }
-    }
-    private void HandleDisconnect(ref SystemState state, ref Singleton singleton)
-    {
-        EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//                    if (!request.Spectator)
+//                    {
+//                        // Request to spawn character
+//                        Entity spawnCharacterRequestEntity = ecb.CreateEntity();
+//                        ecb.AddComponent(spawnCharacterRequestEntity, new CharacterSpawnRequest { ForConnection = rpcReceive.SourceConnection, Delay = -1f });
+//                    }
 
-        // Client disconnect
-        foreach (var (connectionState, ownedEntities, entity) in SystemAPI.Query<ConnectionState, DynamicBuffer<ClientOwnedEntities>>().WithEntityAccess())
-        {
-            if (connectionState.CurrentState == ConnectionState.State.Disconnected)
-            {
-                // Destroy all entities owned by client
-                for (int i = 0; i < ownedEntities.Length; i++)
-                {
-                    ecb.DestroyEntity(ownedEntities[i].Entity);
-                }
+//                    // Remember player for connection
+//                    ecb.AddComponent(rpcReceive.SourceConnection, new JoinedClient { PlayerEntity = playerEntity });
 
-                ecb.RemoveComponent<ClientOwnedEntities>(entity);
-                ecb.RemoveComponent<ConnectionState>(entity);
-            }
-        }
+//                    // Accept join request
+//                    Entity joinRequestAcceptedEntity = state.EntityManager.CreateEntity();
+//                    ecb.AddComponent(joinRequestAcceptedEntity, new JoinRequestAccepted());
+//                    ecb.AddComponent(joinRequestAcceptedEntity, new SendRpcCommandRequest { TargetConnection = rpcReceive.SourceConnection });
 
-        // Disconnect requests
-        EntityQuery disconnectRequestQuery = SystemAPI.QueryBuilder().WithAll<DisconnectRequest>().Build();
-        if (disconnectRequestQuery.CalculateEntityCount() > 0)
-        {
+//                    // Stream in game
+//                    ecb.AddComponent(rpcReceive.SourceConnection, new NetworkStreamInGame());
+//                }
 
-            // Allow systems to have updated since disconnection, for cleanup
-            if (singleton.DisconnectionFramesCounter > 3)
-            {
-                Entity disposeRequestEntity = ecb.CreateEntity();
-                ecb.AddComponent(disposeRequestEntity, new GameManagementSystem.DisposeServerWorldRequest());
-                ecb.AddComponent(disposeRequestEntity, new MoveToLocalWorld());
-                ecb.DestroyEntity(disconnectRequestQuery, EntityQueryCaptureMode.AtRecord);
-            }
+//                ecb.DestroyEntity(entity);
+//            }
+//        }
+//    }
+//    private void HandleDisconnect(ref SystemState state, ref Singleton singleton)
+//    {
+//        EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
 
-            singleton.DisconnectionFramesCounter++;
-        }
-    }
+//        // Client disconnect
+//        foreach (var (connectionState, ownedEntities, entity) in SystemAPI.Query<ConnectionState, DynamicBuffer<ClientOwnedEntities>>().WithEntityAccess())
+//        {
+//            if (connectionState.CurrentState == ConnectionState.State.Disconnected)
+//            {
+//                // Destroy all entities owned by client
+//                for (int i = 0; i < ownedEntities.Length; i++)
+//                {
+//                    ecb.DestroyEntity(ownedEntities[i].Entity);
+//                }
 
-    private void HandleSpawnCharacter(ref SystemState state, ref Singleton singleton, GameResourcesAuthorings gameResources)
-    {
-        if (SystemAPI.QueryBuilder().WithAll<CharacterSpawnRequest>().Build().CalculateEntityCount() > 0)
-        {
-            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+//                ecb.RemoveComponent<ClientOwnedEntities>(entity);
+//                ecb.RemoveComponent<ConnectionState>(entity);
+//            }
+//        }
 
-            foreach (var (spawnRequest, entity) in SystemAPI.Query<RefRW<CharacterSpawnRequest>>().WithEntityAccess())
-            {
-                if (spawnRequest.ValueRW.Delay > 0f)
-                {
-                    spawnRequest.ValueRW.Delay -= SystemAPI.Time.DeltaTime;
-                }
-                else
-                {
-                    if (SystemAPI.HasComponent<NetworkId>(spawnRequest.ValueRW.ForConnection) &&
-                        SystemAPI.HasComponent<JoinedClient>(spawnRequest.ValueRW.ForConnection))
-                    {
-                        int connectionId = SystemAPI.GetComponent<NetworkId>(spawnRequest.ValueRW.ForConnection).Value;
-                        Entity playerEntity = SystemAPI.GetComponent<JoinedClient>(spawnRequest.ValueRW.ForConnection).PlayerEntity;
-                        float3 randomSpawnPosition = new float3(0,70,0);
+//        // Disconnect requests
+//        EntityQuery disconnectRequestQuery = SystemAPI.QueryBuilder().WithAll<DisconnectRequest>().Build();
+//        if (disconnectRequestQuery.CalculateEntityCount() > 0)
+//        {
 
-                        // Spawn character
-                        Entity characterEntity = ecb.Instantiate(gameResources.CharacterGhost);
-                        ecb.SetComponent(characterEntity, new GhostOwner { NetworkId = connectionId });
-                        ecb.SetComponent(characterEntity, LocalTransform.FromPosition(randomSpawnPosition));
-                        ecb.SetComponent(characterEntity, new OwningPlayer { Entity = playerEntity });
-                        ecb.AppendToBuffer(spawnRequest.ValueRW.ForConnection, new ClientOwnedEntities { Entity = characterEntity });
-                        // Assign character to player
-                        FirstPersonPlayer player = SystemAPI.GetComponent<FirstPersonPlayer>(playerEntity);
-                        player.ControlledCharacter = characterEntity;
-                        ecb.SetComponent(playerEntity, player);
-                    }
+//            // Allow systems to have updated since disconnection, for cleanup
+//            if (singleton.DisconnectionFramesCounter > 3)
+//            {
+//                Entity disposeRequestEntity = ecb.CreateEntity();
+//                ecb.AddComponent(disposeRequestEntity, new GameManagementSystem.DisposeServerWorldRequest());
+//                ecb.AddComponent(disposeRequestEntity, new MoveToLocalWorld());
+//                ecb.DestroyEntity(disconnectRequestQuery, EntityQueryCaptureMode.AtRecord);
+//            }
 
-                    ecb.DestroyEntity(entity);
-                }
-            }
-        }
-    }
-}
+//            singleton.DisconnectionFramesCounter++;
+//        }
+//    }
+
+//    private void HandleSpawnCharacter(ref SystemState state, ref Singleton singleton, GameResourcesAuthorings gameResources)
+//    {
+//        if (SystemAPI.QueryBuilder().WithAll<CharacterSpawnRequest>().Build().CalculateEntityCount() > 0)
+//        {
+//            EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
+
+//            foreach (var (spawnRequest, entity) in SystemAPI.Query<RefRW<CharacterSpawnRequest>>().WithEntityAccess())
+//            {
+//                if (spawnRequest.ValueRW.Delay > 0f)
+//                {
+//                    spawnRequest.ValueRW.Delay -= SystemAPI.Time.DeltaTime;
+//                }
+//                else
+//                {
+//                    if (SystemAPI.HasComponent<NetworkId>(spawnRequest.ValueRW.ForConnection) &&
+//                        SystemAPI.HasComponent<JoinedClient>(spawnRequest.ValueRW.ForConnection))
+//                    {
+//                        int connectionId = SystemAPI.GetComponent<NetworkId>(spawnRequest.ValueRW.ForConnection).Value;
+//                        Entity playerEntity = SystemAPI.GetComponent<JoinedClient>(spawnRequest.ValueRW.ForConnection).PlayerEntity;
+//                        float3 randomSpawnPosition = new float3(0, 70, 0);
+
+//                        // Spawn character
+//                        Entity characterEntity = ecb.Instantiate(gameResources.CharacterGhost);
+//                        ecb.SetComponent(characterEntity, new GhostOwner { NetworkId = connectionId });
+//                        ecb.SetComponent(characterEntity, LocalTransform.FromPosition(randomSpawnPosition));
+//                        ecb.SetComponent(characterEntity, new OwningPlayer { Entity = playerEntity });
+//                        ecb.AppendToBuffer(spawnRequest.ValueRW.ForConnection, new ClientOwnedEntities { Entity = characterEntity });
+//                        // Assign character to player
+//                        FirstPersonPlayer player = SystemAPI.GetComponent<FirstPersonPlayer>(playerEntity);
+//                        player.ControlledCharacter = characterEntity;
+//                        ecb.SetComponent(playerEntity, player);
+//                    }
+
+//                    ecb.DestroyEntity(entity);
+//                }
+//            }
+//        }
+//    }
+//}

@@ -11,12 +11,6 @@ using UnityEngine;
 
 public class GameResources : MonoBehaviour
 {
-
-    [Header("Scenes")]
-    public BakedSubSceneReference MenuVisualsScene;
-    public BakedSubSceneReference GameResourcesScene;
-    public BakedSubSceneReference GameScene;
-
     public GameObject PlayerGhost;
     public GameObject CharacterGhost;
     public class Baker : Baker<GameResources>
@@ -28,25 +22,7 @@ public class GameResources : MonoBehaviour
             {
                 PlayerGhost = GetEntity(authoring.PlayerGhost, TransformUsageFlags.Dynamic),
                 CharacterGhost = GetEntity(authoring.CharacterGhost, TransformUsageFlags.Dynamic),
-                GameResourcesScene = authoring.GameResourcesScene.GetEntitySceneReference(),
-                GameScene = authoring.GameScene.GetEntitySceneReference(),
             });
         }
-    }
-}
-[Serializable]
-public struct BakedSubSceneReference
-{
-#if UNITY_EDITOR
-    public SceneAsset SceneAsset;
-#endif
-
-    public EntitySceneReference GetEntitySceneReference()
-    {
-#if UNITY_EDITOR
-        return new EntitySceneReference(SceneAsset);
-#else
-        return default;
-#endif
     }
 }

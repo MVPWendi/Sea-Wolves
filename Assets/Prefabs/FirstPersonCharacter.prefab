@@ -127,7 +127,6 @@ GameObject:
   - component: {fileID: 2674214978767437844}
   - component: {fileID: -2061521281931703209}
   - component: {fileID: -1783250221553410111}
-  - component: {fileID: 2968853349544623928}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: Untagged
@@ -272,19 +271,8 @@ MonoBehaviour:
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
---- !u!114 &2968853349544623928
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1555240849038293811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c58dfd508ac05746a67d406d44ba15a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  HealthBar: {fileID: 4649602557518599762, guid: 203cafef88d49a04a8c579e889ecf790, type: 3}
+  RollbackPredictedSpawnedGhostState: 0
+  RollbackPredictionOnStructuralChanges: 1
 --- !u!1 &3463604651959167738
 GameObject:
   m_ObjectHideFlags: 0

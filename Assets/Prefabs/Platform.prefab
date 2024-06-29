@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2691634292541566685}
   - component: {fileID: 5742734101596131968}
   - component: {fileID: 1706666877510316403}
-  - component: {fileID: 646452747625764972}
   - component: {fileID: 1369380432546088048}
   - component: {fileID: 6978618110552797157}
   m_Layer: 0
@@ -71,41 +70,6 @@ MonoBehaviour:
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
---- !u!114 &646452747625764972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2664613796296333389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ef173c83642b25458d4d3ef2b80e201, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MovingPlatform:
-    TranslationAxis:
-      x: 1000
-      y: 0
-      z: 0
-    TranslationAmplitude: 1
-    TranslationSpeed: 1
-    RotationAxis:
-      x: 0
-      y: 0
-      z: 0
-    RotationSpeed: 0
-    IsInitialized: 0
-    OriginalPosition:
-      x: 0
-      y: 0
-      z: 0
-    OriginalRotation:
-      value:
-        x: 0
-        y: 0
-        z: 0
-        w: 0
 --- !u!114 &1369380432546088048
 MonoBehaviour:
   m_ObjectHideFlags: 0
