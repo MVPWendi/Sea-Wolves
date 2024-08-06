@@ -24,12 +24,10 @@ namespace Assets
         {
             state.RequireForUpdate<NetworkTime>();
             state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            state.Enabled = false;
         }
 
         public void OnUpdate(ref SystemState state)
         {
-
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             if (networkTime.ServerTick.IsValid && !networkTime.IsFirstTimeFullyPredictingTick) return;
             var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
@@ -74,11 +72,8 @@ namespace Assets
                 // Выполняем рейкаст
                 if (physicsWorld.CastRay(raycastInput, out var hit))
                 {
-                    
-                    if(state.EntityManager.HasComponent<NPCComponent>(hit.Entity))
-                    {
-                        Debug.Log("hit: " + hit.Entity.Index);
-                    }
+                    Debug.Log("hit: " + hit.Entity.Index);
+                    ecb.AddComponent(hit.Entity, new PickedUpItem { Player = player.ValueRO.ControlledCharacter });
                 }
             }
             ecb.Playback(state.EntityManager);

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Components
@@ -17,6 +18,12 @@ namespace Assets.Components
         [GhostField] public float CurrentHealth;
     }
 
+    [GhostComponent]
+    public struct PlayerID : IComponentData
+    {
+        [GhostField] public FixedString128Bytes Guid;
+        [GhostField] public FixedString128Bytes Name;
+    }
     public class HealthUIComponent : IComponentData
     {
         public HealthBarUI HealthUI;
@@ -40,5 +47,13 @@ namespace Assets.Components
 
     }
 
-    
+    public struct InventoryUIInitialized : IComponentData
+    {
+
+    }
+
+    public struct InventoryUIReference : IComponentData
+    {
+        public Entity InventoryUIEntity;
+    }
 }

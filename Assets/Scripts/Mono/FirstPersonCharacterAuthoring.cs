@@ -9,6 +9,8 @@ using UnityEngine.Serialization;
 using Assets.Scripts;
 using Assets;
 using Assets.Components;
+using UnityEditor;
+using System;
 
 [DisallowMultipleComponent]
 public class FirstPersonCharacterAuthoring : MonoBehaviour
@@ -65,7 +67,12 @@ public class FirstPersonCharacterAuthoring : MonoBehaviour
             AddComponent(entity, new CharacterStatsComponent());
             AddComponent(entity, new HealthComponent { CurrentHealth = 100, MaxHealth = 100});
             AddComponent(entity, new InventoryComponent());
-            AddBuffer<Item>(entity);
+            var guid = Guid.NewGuid();
+            AddComponent(entity, new PlayerID { Guid = guid.ToString(), Name = "MVPWendi" });
+            var buffer = AddBuffer<Item>(entity);
+            buffer.Add(new Item { Amount = 1, Cost = 1, Guid = new System.Guid(), Name = new Unity.Collections.FixedString128Bytes("Шоколадка") });
+            buffer.Add(new Item { Amount = 1, Cost = 1, Guid = new System.Guid(), Name = new Unity.Collections.FixedString128Bytes("Калаш") });
+            buffer.Add(new Item { Amount = 1, Cost = 1, Guid = new System.Guid(), Name = new Unity.Collections.FixedString128Bytes("Аптечка") });
         }
     }
 }

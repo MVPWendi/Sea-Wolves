@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8761602096592072613}
   - component: {fileID: 7201341638548610489}
+  - component: {fileID: 3115668308177521384}
   m_Layer: 0
   m_Name: Res
   m_TagString: Untagged
@@ -44,5 +45,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0432d44918cd8e14287459e1eab013a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IslandPrefab: {fileID: 3022890388878096555, guid: 957ebdec55b34db47ad4500c75168b57, type: 3}
-  PlatformPrefab: {fileID: 2664613796296333389, guid: f6d56f6ea09a40d47b2f2eb6a96b57a5, type: 3}
+  PlayerPrefab: {fileID: 577874318210893199, guid: 8c22dcbefac332745a1efbea69cb8bfc, type: 3}
+  CharacterPrefab: {fileID: 1555240849038293811, guid: e95be3f6ef9cc8243994bdcda968a0e5, type: 3}
+--- !u!114 &3115668308177521384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8268871310883733615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681354c46a9241f4c8f4a6b6d6b6ae58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InventoryUI: {fileID: -1763220782873718852, guid: 5b8ff8c6024756845969977820d7a947, type: 3}

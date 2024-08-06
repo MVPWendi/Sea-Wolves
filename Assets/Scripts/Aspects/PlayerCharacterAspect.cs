@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace Assets.Aspects
@@ -16,6 +17,8 @@ namespace Assets.Aspects
         public readonly RefRW<InventoryComponent> Inventory;
         public readonly RefRW<FirstPersonCharacterControl> CharControl;
         public readonly RefRW<InteractComponent> Interact;
+        public readonly RefRW<LocalTransform> Transform;
+        public readonly RefRW<PlayerID> ID;
         public void ShowHealthBar(Entity entity, EntityManager manager)
         {
             var healthUI = manager.GetComponentObject<CharacterUIS>(entity).HealthBar;
@@ -25,16 +28,11 @@ namespace Assets.Aspects
             newUI.MaxHealth = Health.ValueRW.MaxHealth;
             newUI.UpdateHealth();
 
-            AddItem(entity, manager);
         }
 
-
-
-        public void AddItem(Entity entity, EntityManager manager)
+        public DynamicBuffer<Item> GetBuffer(Entity entity, EntityManager manager)
         {
-            var buffer = manager.GetBuffer<Item>(entity);
-            buffer.Add(new Item { Amount = 1, Model = Entity.Null, Name = new Unity.Collections.FixedString128Bytes("Item 1") });
-            buffer.Add(new Item { Amount = 5, Model = Entity.Null, Name = new Unity.Collections.FixedString128Bytes("Item 2") });
+            return manager.GetBuffer<Item>(entity);
         }
         public void UpdateHealth(Entity entity, EntityManager manager)
         {
