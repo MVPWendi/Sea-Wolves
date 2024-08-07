@@ -72,11 +72,6 @@ namespace Assets
             // Query entities with DropRequest and ReceiveRpcCommandRequest components
             foreach (var (dropRequest, entity) in SystemAPI.Query<DropRequest>().WithEntityAccess())
             {
-                // Debug log to verify that request is received
-                Debug.Log("Get request!");
-                Debug.Log(dropRequest.PlayerGUID);
-                Debug.Log(dropRequest.ItemIndex);
-
                 // Create a query to find entities with PlayerID component
                 var entityQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerID>());
                 var entities = entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
@@ -86,17 +81,8 @@ namespace Assets
                     var playerIDComponent = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<PlayerID>(ent);
                     if (playerIDComponent.Guid == dropRequest.PlayerGUID)
                     {
-                        var playerAspect = state.EntityManager.GetAspect<PlayerCharacterAspect>(ent);
-                        var playerBuffer = playerAspect.GetBuffer(ent, state.EntityManager);
-                        playerBuffer.RemoveAt(dropRequest.ItemIndex);
-
                         var newEntity = ecb.CreateEntity();
-                        ecb.AddComponent(newEntity, new InventorySyncRequest {PlayerGUID = dropRequest.PlayerGUID });
-                        var newBuffer = ecb.AddBuffer<Item>(newEntity);
-                        for (int i = 0; i < playerBuffer.Length; i++)
-                        {
-                            newBuffer.Add(playerBuffer[i]);
-                        }
+                        ecb.AddComponent(newEntity, new InventorySyncRequest {PlayerGUID = dropRequest.PlayerGUID, RemoveIndex = dropRequest.ItemIndex });
                     }
                 }
 

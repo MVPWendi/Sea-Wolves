@@ -39,6 +39,7 @@ namespace Assets.Components
 
     public struct InventoryComponent : IComponentData
     {
+        
     }
 
 

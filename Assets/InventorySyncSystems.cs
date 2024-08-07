@@ -1,5 +1,6 @@
 ﻿using Assets.Aspects;
 using Assets.Components;
+using Assets.Scripts.Common;
 using Assets.Scripts.Components;
 using System;
 using System.Linq;
@@ -7,19 +8,22 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
+using Item = Assets.Components.Item;
 
 namespace Assets
 {
     // RPC для передачи данных инвентаря
     public struct InventoryUpdateRpc : IRpcCommand
     {
-        public FixedString128Bytes PlayerGUID;
-        public NativeArray<Item> Items;
-    }
 
-    public struct InventorySyncRequest : IRpcCommand
+        public FixedString128Bytes PlayerGUID;
+        public int RemoveIndex;
+    }
+    
+    public struct InventorySyncRequest : IComponentData
     {
         public FixedString128Bytes PlayerGUID;
+        public int RemoveIndex;
     }
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial struct ClientInventorySyncSystem : ISystem
@@ -31,34 +35,23 @@ namespace Assets
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            foreach (var (req, receive, entity) in SystemAPI.Query<InventoryUpdateRpc, ReceiveRpcCommandRequest>().WithEntityAccess())
+            foreach (var (req, receiveRPC, entity) in SystemAPI.Query<InventoryUpdateRpc, ReceiveRpcCommandRequest>().WithEntityAccess())
             {
                 // Обновление буфера на клиенте
-
-                Debug.Log("SYNC 2");
-                var entityQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerID>());
-                var entities = entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-
-                foreach (var ent in entities)
-                {
-                    Debug.Log("SYNC 3");
-                    var playerIDComponent = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<PlayerID>(ent);
-                    if (playerIDComponent.Guid == req.PlayerGUID)
-                    {
-                        var playerAspect = state.EntityManager.GetAspect<PlayerCharacterAspect>(ent);
-                        var buffer = playerAspect.GetBuffer(ent, state.EntityManager);
-                        var requestBuffer = state.EntityManager.GetBuffer<Item>(entity);
-                        buffer.Clear();
-                        foreach (var item in requestBuffer)
-                        {
-                            buffer.Add(item);
-                        }
-                        Debug.Log("SYNC 4");
-                    }
-                }             
+                var playerEntity = Utils.GetPlayerEntity(req.PlayerGUID, state.EntityManager);
+                var buffer = state.EntityManager.GetBuffer<Item>(playerEntity);
+                Debug.Log("Client message: buffer length BEFORE: " + buffer.Length);
+                buffer.RemoveAt(req.RemoveIndex);
+                //buffer.Add(new Item { Amount = 1, Cost = 1, Guid = new System.Guid(), Name = new Unity.Collections.FixedString128Bytes("Аптечка") });
+                Debug.Log("Client message: buffer length AFTER: " + buffer.Length);
+                var inventoryUIRef = state.EntityManager.GetComponentData<InventoryUIReference>(playerEntity);
+                var inventoryUI = state.EntityManager.GetComponentObject<InventoryUI>(inventoryUIRef.InventoryUIEntity);
+                inventoryUI.InitializeInventory(buffer);
+                // Вот тут
                 ecb.DestroyEntity(entity);
             }
             ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
     }
 
@@ -71,41 +64,27 @@ namespace Assets
         }
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Allocator.TempJob);
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (item, entity) in SystemAPI.Query<InventorySyncRequest>().WithEntityAccess())
             {
-                Debug.Log("SYNC 1");
                 var updateRpc = ecb.CreateEntity();
-
-                Debug.Log(item.PlayerGUID);
-                var requestBuffer = state.EntityManager.GetBuffer<Item>(entity);
-                Item[] itemDataArray = new Item[requestBuffer.Length];
-                for (int i = 0; i < requestBuffer.Length; i++)
-                {
-                    var item1 = requestBuffer[i];
-                    itemDataArray[i] = new Item
-                    {
-                        Name = item1.Name,
-                        Amount = item1.Amount,
-                        Cost = item1.Cost,
-                        Guid = item1.Guid,
-                        Model = item1.Model,
-                        // Присвойте значения другим свойствам
-                    };
-                }
                 ecb.AddComponent(updateRpc, new InventoryUpdateRpc
                 {
                     PlayerGUID = item.PlayerGUID,
-                    Items = new NativeArray<Item>(itemDataArray, Allocator.Temp)
-                });                
-                Debug.Log("SYNC 12");
+                    RemoveIndex = item.RemoveIndex,
+                });
+                var playerEntity = Utils.GetPlayerEntity(item.PlayerGUID, state.EntityManager);
+                var buffer = state.EntityManager.GetBuffer<Item>(playerEntity);
+                Debug.Log("Server message: PLAYER ENTITY INDEX: " + playerEntity.Index);
+                Debug.Log("Server message: buffer length BEFORE: " + buffer.Length);
+                buffer.RemoveAt(item.RemoveIndex);
+                //buffer.Add(new Item { Amount = 1, Cost = 1, Guid = new System.Guid(), Name = new Unity.Collections.FixedString128Bytes("Аптечка") });
+                Debug.Log("Server message: buffer length AFTER: " + buffer.Length);
                 ecb.AddComponent(updateRpc, new SendRpcCommandRequest());
                 ecb.DestroyEntity(entity);
-
-                Debug.Log("SYNC 13");
             }
             ecb.Playback(state.EntityManager);
-            Debug.Log("SYNC 14");
+            ecb.Dispose();
         }
     }
 }
