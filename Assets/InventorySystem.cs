@@ -16,11 +16,10 @@ namespace Assets
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial struct InventorySystem : ISystem
     {
-        public static InventorySystem Instance;
         void OnCreate(ref SystemState state)
         {
-            Instance = this;
             state.RequireForUpdate<UIPrefabs>();
+            state.RequireForUpdate<NetworkId>();
         }
         void OnUpdate(ref SystemState state)
         {
@@ -29,8 +28,8 @@ namespace Assets
             var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
             foreach (var (playerAspect, entity) in SystemAPI.Query<PlayerCharacterAspect>().WithAll<GhostOwnerIsLocal>().WithNone<InventoryUIInitialized>().WithEntityAccess())
             {
-                var inventoryPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>().InventoryUI;
-                var newUI = GameObject.Instantiate(inventoryPrefab);
+                var inventoryPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>();
+                var newUI = GameObject.Instantiate(inventoryPrefab.InventoryUIPrefab).GetComponent<InventoryUI>();
                 newUI.PlayerGUID = playerAspect.ID.ValueRO.Guid.ToString();
                 var buffer = playerAspect.GetBuffer(entity, state.EntityManager);
                 
@@ -65,6 +64,11 @@ namespace Assets
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct ServerInventorySystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<UIPrefabs>();
+            state.RequireForUpdate<NetworkId>();
+        }
         public void OnUpdate(ref SystemState state)
         {
             // Create an EntityCommandBuffer for temporary allocation
@@ -97,9 +101,6 @@ namespace Assets
             ecb.Dispose();
         }
 
-        public void OnCreate(ref SystemState state)
-        {
-
-        }
+        
     }
 }

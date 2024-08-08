@@ -86,4 +86,14 @@ public class InventoryUI : MonoBehaviour
             
         }
     }
+
+
+    public class InventoryUIBaker : Baker<InventoryUI>
+    {
+        public override void Bake(InventoryUI authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponentObject(entity, authoring);
+        }
+    }
 }

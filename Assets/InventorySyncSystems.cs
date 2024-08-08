@@ -30,6 +30,7 @@ namespace Assets
     {
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<NetworkId>();
         }
 
         public void OnUpdate(ref SystemState state)
@@ -60,7 +61,7 @@ namespace Assets
     {
         public void OnCreate(ref SystemState state)
         {
-
+            state.RequireForUpdate<NetworkId>();
         }
         public void OnUpdate(ref SystemState state)
         {
